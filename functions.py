@@ -1,4 +1,3 @@
-
 """
 # -- --------------------------------------------------------------------------------------------------- -- #
 # -- project: A SHORT DESCRIPTION OF THE PROJECT                                                         -- #
@@ -8,3 +7,38 @@
 # -- repository: https://github.com/psc9718/myst_if708079_lab1                                                                  -- #
 # -- --------------------------------------------------------------------------------------------------- -- #
 """
+### Construir el vector de fechas a partir del vector de nombres
+
+# estas serviran como etiquetas en dataframe y para yfinance
+from pandas import np
+
+from data import archivos, data_archivos
+
+
+
+t_fechas = [i.strftime('%d-%m-%Y') for i in sorted([pd.to_datetime(i[8:]).date() for i in archivos])]
+
+# lista con fechas ordenadas (para usarse como  indexadores de archivos)
+
+i_fechas = [j.strftime('%Y-%m-%d') for j in sorted([pd.to_datetime(i[8:]).date() for i in archivos])]
+
+# Descargar y acomodar datos
+
+tickers = []
+for i in archivos:
+    # i = archivos[1]
+    l_tickers = list(data_archivos[i]['Ticker'])
+    print(l_tickers)
+    [tickers.append(i + '.MX') for i in l_tickers]
+global_tickers = np.unique(tickers).tolist()
+
+# Obtener posiciones historicas
+
+
+global_tickers = [i.replace('GFREGIOO.MX', 'RA.MX') for i in global_tickers]
+global_tickers = [i.replace('MEXCHEM.MX', 'ORBIA.MX') for i in global_tickers]
+global_tickers = [i.replace('LIVEPOLC.1.MX', 'LIVEPOLC-1.MX') for i in global_tickers]
+
+# eliminar MXN, USD, KOFL
+[global_tickers.remove(i) for i in ['MXN.MX', 'USD.MX', 'KOFL.MX','KOFUBL.MX' ,'BSMXB.MX']]
+

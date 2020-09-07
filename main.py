@@ -15,39 +15,8 @@ import numpy as np
 import yfinance as yf
 import time as time
 
-### Construir el vector de fechas a partir del vector de nombres
-
-# estas serviran como etiquetas en dataframe y para yfinance
-from pandas import np
-
-from data import archivos, data_archivos
-
-t_fechas = [i.strftime('%d-%m-%Y') for i in sorted([pd.to_datetime(i[8:]).date() for i in archivos])]
-
-# lista con fechas ordenadas (para usarse como  indexadores de archivos)
-
-i_fechas = [j.strftime('%Y-%m-%d') for j in sorted([pd.to_datetime(i[8:]).date() for i in archivos])]
-
-# Descargar y acomodar datos
-
-tickers = []
-for i in archivos:
-    # i = archivos[1]
-    l_tickers = list(data_archivos[i]['Ticker'])
-    print(l_tickers)
-    [tickers.append(i + '.MX') for i in l_tickers]
-global_tickers = np.unique(tickers).tolist()
-# Obtener posiciones historicas
 
 
-global_tickers = [i.replace('GFREGIOO.MX', 'RA.MX') for i in global_tickers]
-global_tickers = [i.replace('MEXCHEM.MX', 'ORBIA.MX') for i in global_tickers]
-global_tickers = [i.replace('LIVEPOLC.1.MX', 'LIVEPOLC-1.MX') for i in global_tickers]
-
-# eliminar MXN, USD, KOFL
-[global_tickers.remove(i) for i in ['MXN.MX', 'USD.MX', 'KOFL.MX','KOFUBL.MX' ,'BSMXB.MX']]
-
-# Descargar y acomodar los precios historticos
 
 inicio = time.time()
 data = yf.download(global_tickers, start="2017-08-21", end="2020-08-21", actions=False, group_by="close", interval='1d',
@@ -118,21 +87,28 @@ pos_datos ['Precio_m2']=m2
 # capital destinado por accion = proporcion de capital - comisiones por la posicion
 pos_datos['Capital'] = pos_datos['Peso (%)'] * k - pos_datos['Peso (%)'] * k * c
 
+# pos_datos ['Titulos']
+# Calcular los titulos a comprar de cada activo
 # capital de titulos por accion
 pos_datos['Titulos'] = pos_datos['Capital'] // pos_datos['Precio']
 
-# pos_datos ['Titulos']
-# Calcular los titulos a comprar de cada activo
+
 # pos_datos ['Postura']
 # multiplicar los titulos a comprar de cada activo
+pos_datos['Postura'] = pos_datos['Titulos']*pos_datos['Precio']
+
 # pos_datos ['Comision']
 # calcular la comision que pagas por ejecutar la "postura"
+pos_datos['Comision'] = pos_datos['Postura']*c
+pos_comision = pos_datos['Comision'].sum()
 
 # efectivo libre en la posición
 # capital-postura-comision
+pos_cas = k- pos_datos['Postura'].sum() - pos_comision
 
 # pos_value
 # la suma de las posturas(es decir, las posturas de cada activo)
+pos_value = pos_datos['Postura'].sum()
 
 # guardar en una lista el timestamp
 # guardar en una lista capital(valor de la postura total(suma de las posturas + cash)
