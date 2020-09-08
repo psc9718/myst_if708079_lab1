@@ -14,6 +14,7 @@ from os.path import isfile, join
 import numpy as np
 import yfinance as yf
 import time as time
+from functions  fn
 
 
 
