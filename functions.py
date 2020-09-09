@@ -10,9 +10,11 @@
 ### Construir el vector de fechas a partir del vector de nombres
 
 # estas serviran como etiquetas en dataframe y para yfinance
-from pandas import np
+import pandas as pd
 
 from data import archivos, data_archivos
+import numpy as np
+
 
 def f_fechas (archivos):
 
