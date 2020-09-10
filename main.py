@@ -17,13 +17,19 @@ import time as time
 import functions as fn
 import data as dt
 
+print (dt.archivos[0:4])
+print (dt.data_archivos.keys().to_list()[0:4])
+
+
 fechas = fn.f_fechas(archivos=dt.archivos)
 # tickers
 global_tickers = fn.f_ticker(archivos=dt.archivos, data_archivos=dt.data_archivos)
 
+
 inicio = time.time()
-data = yf.download(global_tickers, start="2017-08-21", end="2020-08-21", actions=False, group_by="close", interval='1d',
+data = yf.download(global_tickers, start="2018-01-31", end="2020-08-21", actions=False, group_by="close", interval='1d',
                    auto_adjust=False, prepost=False, threads=False)
+
 print('se tardo', time.time() - inicio, 'segundos')
 
 # convertir columna de fechas
@@ -80,7 +86,7 @@ pos_datos['Ticker'] = pos_datos['Ticker'].replace('GFREGIOO.1.MX', 'RA.MX')
 
 ##Desglose
 
-match = 7
+match = 0
 precios.index.to_list()[match]
 # precios necesarios para la posicion
 m1 = np.array(precios.iloc[match, [i in pos_datos['Ticker'].to_list() for i in precios.columns.to_list()]])
@@ -120,11 +126,11 @@ pos_value = pos_datos['Postura'].sum()
 
 # for para todos los meses
 
-for a in range(1, len(dt.archivos)):
+for match in range(1, (len(dt.archivos))-1):
 
-    precios.index.to_list()[a]
+    precios.index.to_list()[match]
 
-    m1 = np.array(precios.iloc[a, [i in pos_datos['Ticker'].to_list() for i in precios.columns.to_list()]])
+    m1 = np.array(precios.iloc[match, [i in pos_datos['Ticker'].to_list() for i in precios.columns.to_list()]])
     pos_datos['Precio'] = m1
 
     # Postura x accion
@@ -134,8 +140,10 @@ for a in range(1, len(dt.archivos)):
     pos_value = pos_datos['Postura'].sum()
 
     # Lista de valores
-    df_pasiva['timestamp'].append(fechas['t_fechas'][a])
+    df_pasiva['timestamp'].append(fechas['t_fechas'][match])
     df_pasiva['capital'].append(pos_value + pos_cas)
+
+
 
 # Dataframe resultados
 df_pasiva = pd.DataFrame(df_pasiva)
