@@ -34,7 +34,7 @@ def f_ticker(archivos, data_archivos):
     for i in archivos:
         # i = archivos[1]
         l_tickers = list(data_archivos[i]['Ticker'])
-        print(l_tickers)
+        #print(l_tickers)
         [tickers.append(i + '.MX') for i in l_tickers]
     global_tickers = np.unique(tickers).tolist()
 

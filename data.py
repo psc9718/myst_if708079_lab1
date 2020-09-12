@@ -19,9 +19,13 @@ import time as time
 # Lista de archivos
 
 # Ruta absoluta de la carpeta
+#Leer archivos
 abspath = path.abspath('files/NAFTRAC_holdings')
-archivos = [f[:-4] for f in listdir(abspath) if isfile(join(abspath, f))]
-
+#Lista de todos los archivos en la carpeta
+#Comprension de listas
+archivos = [f[8:-4] for f in listdir(abspath) if isfile(join(abspath, f))]
+#Ordenar archivos cronologicamente
+archivos = ['NAFTRAC_' + i.strftime('%d%m%y') for i in sorted(pd.to_datetime(archivos))]
 # Leer archivos
 # crear un diccionario para almacenar todos los datos
 data_archivos = {}

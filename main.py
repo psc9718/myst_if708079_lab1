@@ -17,17 +17,17 @@ import time as time
 import functions as fn
 import data as dt
 
-print (dt.archivos[0:4])
-print (dt.data_archivos.keys().to_list()[0:4])
+#print (dt.archivos[0:4])
+#print (dt.data_archivos.keys().to_list()[0:4])
 
 
 fechas = fn.f_fechas(archivos=dt.archivos)
 # tickers
 global_tickers = fn.f_ticker(archivos=dt.archivos, data_archivos=dt.data_archivos)
 
-
+##############
 inicio = time.time()
-data = yf.download(global_tickers, start="2018-01-31", end="2020-08-21", actions=False, group_by="close", interval='1d',
+data = yf.download(global_tickers, start="2018-01-30", end="2020-08-24", actions=False, group_by="close", interval='1d',
                    auto_adjust=False, prepost=False, threads=False)
 
 print('se tardo', time.time() - inicio, 'segundos')
@@ -46,7 +46,8 @@ precios = data_close.iloc[[int(np.where(data_close.index == i)[0]) for i in ic_f
 # ordenar columnas lexicograficamente
 precios = precios.reindex(sorted(precios.columns), axis=1)
 
-# POSICION INICIAL
+ #################
+# POSICIONINICIAL
 
 # capital inicial·
 
@@ -62,7 +63,7 @@ comisiones = []
 # los % para KOFL, KOFUBL, BMSMXB, USD asignarlos a CASH
 c_activos = ['KOFL', 'KOFUBL', 'BSMXB', 'MXN', 'USD']
 # diccionario para resultado final
-df_pasiva = {'timestamp': ['05-01-2018'], 'capital': [k]}
+df_pasiva = {'timestamp': ['30-01-2018'], 'capital': [k]}
 #
 pos_datos = dt.data_archivos[dt.archivos[0]].copy().sort_values('Ticker')[['Ticker', 'Nombre', 'Peso (%)']]
 
@@ -82,18 +83,18 @@ pos_datos['Ticker'] = pos_datos['Ticker'] + '.MX'
 # Corregir tickers en datos
 pos_datos['Ticker'] = pos_datos['Ticker'].replace('LIVEPOLC.1.MX', 'LIVEPOLC-1.MX')
 pos_datos['Ticker'] = pos_datos['Ticker'].replace('MEXCHEM.MX', 'ORBIA.MX')
-pos_datos['Ticker'] = pos_datos['Ticker'].replace('GFREGIOO.1.MX', 'RA.MX')
+pos_datos['Ticker'] = pos_datos['Ticker'].replace('GFREGIOO.MX', 'RA.MX')
 
 ##Desglose
 
 match = 0
 precios.index.to_list()[match]
 # precios necesarios para la posicion
-m1 = np.array(precios.iloc[match, [i in pos_datos['Ticker'].to_list() for i in precios.columns.to_list()]])
+#m1 = np.array(precios.iloc[match, [i in pos_datos['Ticker'].to_list() for i in precios.columns.to_list()]])
 m2 = [precios.iloc[match, precios.columns.to_list().index(i)] for i in pos_datos['Ticker']]
 
-pos_datos['Precio'] = m1
-pos_datos['Precio_m2'] = m2
+#pos_datos['Precio_m1'] = m1
+pos_datos['Precio'] = m2
 
 # capital destinado por accion = proporcion de capital - comisiones por la posicion
 pos_datos['Capital'] = pos_datos['Peso (%)'] * k - pos_datos['Peso (%)'] * k * c
@@ -120,18 +121,20 @@ pos_cas = k - pos_datos['Postura'].sum() - pos_comision
 # la suma de las posturas(es decir, las posturas de cada activo)
 pos_value = pos_datos['Postura'].sum()
 
+
 # guardar en una lista el timestamp
-# guardar en una lista capital(valor de la postura total(suma de las posturas + cash)
-# pos_cash
+# guardar en una lista capital(valor de la postura total(suma de las posturas + cas)
+# pos_cas
 
 # for para todos los meses
 
-for match in range(1, (len(dt.archivos))-1):
 
-    precios.index.to_list()[match]
+for a in range(0, (len(dt.archivos))):
 
-    m1 = np.array(precios.iloc[match, [i in pos_datos['Ticker'].to_list() for i in precios.columns.to_list()]])
-    pos_datos['Precio'] = m1
+    precios.index.to_list()[a]
+
+    m2 = [precios.iloc[match, precios.columns.to_list().index(i)] for i in pos_datos['Ticker']]
+    pos_datos['Precio'] = m2
 
     # Postura x accion
     pos_datos['Postura'] = pos_datos['Titulos'] * pos_datos['Precio']
@@ -140,10 +143,17 @@ for match in range(1, (len(dt.archivos))-1):
     pos_value = pos_datos['Postura'].sum()
 
     # Lista de valores
-    df_pasiva['timestamp'].append(fechas['t_fechas'][match])
+    df_pasiva['timestamp'].append(fechas['t_fechas'][a])
     df_pasiva['capital'].append(pos_value + pos_cas)
 
+    match = match + 1
+#Dataframeresultados
 
-
-# Dataframe resultados
 df_pasiva = pd.DataFrame(df_pasiva)
+#df_pasiva['rend']=df_pasiva['capital'].pct_change().dropna()
+df_pasiva['rend'] = [0] + list(np.log(df_pasiva['capital']) - np.log(df_pasiva['capital'].shift(1)))[1:]
+df_pasiva['rend_acum'] = round(df_pasiva['rend'].cumsum(), 4)
+
+
+
+inv_act = dt.data_archivos[fechas[0]].copy().sort_values('Peso(%)', ascending= False)['Tickera']
