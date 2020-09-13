@@ -11,9 +11,7 @@
 import pandas as pd
 from os import listdir, path
 from os.path import isfile, join
-import numpy as np
-import yfinance as yf
-import time as time
+
 
 ### Inversión pasiva
 # Lista de archivos

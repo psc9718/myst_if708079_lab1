@@ -16,6 +16,7 @@ import yfinance as yf
 import time as time
 import functions as fn
 import data as dt
+import numpy as np
 
 #print (dt.archivos[0:4])
 #print (dt.data_archivos.keys().to_list()[0:4])
@@ -25,28 +26,12 @@ fechas = fn.f_fechas(archivos=dt.archivos)
 # tickers
 global_tickers = fn.f_ticker(archivos=dt.archivos, data_archivos=dt.data_archivos)
 
-##############
-inicio = time.time()
-data = yf.download(global_tickers, start="2018-01-30", end="2020-08-24", actions=False, group_by="close", interval='1d',
-                   auto_adjust=False, prepost=False, threads=False)
 
-print('se tardo', time.time() - inicio, 'segundos')
 
 # convertir columna de fechas
-data_close = pd.DataFrame({i: data[i]['Close'] for i in global_tickers})
+precios = fn.f_precios(p_global_tickers= global_tickers, p_fechas= fechas)
 
-# tomar solo las fechas de interes (utilizando conjuntos)
-i_fechas = [j.strftime('%Y-%m-%d') for j in sorted([pd.to_datetime(i[8:]).date() for i in dt.archivos])]
 
-ic_fechas = sorted(list(set(data_close.index.astype(str).tolist()) & set(fechas['i_fechas'])))
-
-# localizar todos los precios
-precios = data_close.iloc[[int(np.where(data_close.index == i)[0]) for i in ic_fechas]]
-
-# ordenar columnas lexicograficamente
-precios = precios.reindex(sorted(precios.columns), axis=1)
-
- #################
 # POSICIONINICIAL
 
 # capital inicial·
@@ -128,7 +113,6 @@ pos_value = pos_datos['Postura'].sum()
 
 # for para todos los meses
 
-
 for a in range(0, (len(dt.archivos))):
 
     precios.index.to_list()[a]
@@ -155,5 +139,3 @@ df_pasiva['rend'] = [0] + list(np.log(df_pasiva['capital']) - np.log(df_pasiva['
 df_pasiva['rend_acum'] = round(df_pasiva['rend'].cumsum(), 4)
 
 
-
-inv_act = dt.data_archivos[fechas[0]].copy().sort_values('Peso(%)', ascending= False)['Tickera']

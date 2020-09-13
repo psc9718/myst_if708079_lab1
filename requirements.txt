@@ -1,5 +1,3 @@
-yfinance
-
 # -- --------------------------------------------------------------------------------------------------- -- #
 # -- project: A SHORT DESCRIPTION OF THE PROJECT                                                         -- #
 # -- script: requirements.txt : text file with the required libraries for the project                    -- #
